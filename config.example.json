@@ -1,0 +1,7 @@
+{
+    "appName": "Go Timedoor Transaction Module",
+
+    "server": {
+        "port": 1323
+    }
+}
