@@ -1,7 +1,16 @@
 {
-    "appName": "Go Timedoor Transaction Module",
+    "appName": "Timedoor Go Transaction Module",
 
     "server": {
         "port": 1323
-    }
+    },
+
+    "database": {
+        "mongodb": {
+            "uri": "mongodb://localhost:27017",
+            "collection": "transaction_module"
+        }
+    },
+
+    "url": "http://localhost:1323"
 }

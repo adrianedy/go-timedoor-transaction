@@ -1,4 +1,4 @@
-module github.com/adrianedy/go-timedoor-transaction
+module github.com/backend-timedoor/go-transaction-module
 
 go 1.20
 

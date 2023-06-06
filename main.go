@@ -1,28 +1,43 @@
 package main
 
 import (
-	"context"
+	"fmt"
 
-	"github.com/adrianedy/go-timedoor-transaction/database"
-	"github.com/adrianedy/go-timedoor-transaction/route"
+	"github.com/backend-timedoor/go-transaction-module/database"
+	"github.com/backend-timedoor/go-transaction-module/routes/api"
+	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 )
 
-func main() {
-	router := route.Init()
+func init() {
+	configInit()
+	databaseInit()
+}
 
+func main() {
+	e := echo.New()
+
+	routesConfig(e)
+
+	e.Logger.Print("Starting ", viper.GetString("appName"))
+	e.Logger.Fatal(e.Start(":" + viper.GetString("server.port")))
+}
+
+func configInit() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		router.Logger.Fatal(err)
+		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+}
 
-	connection := database.GetConnection()
-	defer connection.Disconnect(context.TODO())
+func databaseInit() {
+	database.GetConnection()
+}
 
-	router.Logger.Print("Starting ", viper.GetString("appName"))
-	router.Logger.Fatal(router.Start(":" + viper.GetString("server.port")))
+func routesConfig(e *echo.Echo) {
+	api.RegisterApiV1Routes(e)
 }
