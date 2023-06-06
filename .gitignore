@@ -22,3 +22,6 @@ go.work
 
 # Config file
 config.json
+
+# Output of the go air tool
+tmp/
