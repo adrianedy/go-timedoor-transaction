@@ -53,6 +53,7 @@ func GetTransactions() echo.HandlerFunc {
 		pageNum, err := strconv.ParseInt(pageStr, 10, 64)
 		limitNum, err := strconv.ParseInt(limitStr, 10, 64)
 
+		// Set default value
 		if pageNum <= 0 {
 			pageNum = 1
 		}
@@ -128,7 +129,6 @@ func generatePageLink(pageNum, limitNum int) string {
 	return fmt.Sprintf("%s?page=%d&limit=%d", baseURL, pageNum, limitNum)
 }
 
-// Helper function to generate the URL for the next page
 func generateNextPageLink(currentPage, lastPage, limitNum int) string {
 	if currentPage >= lastPage {
 		return ""
@@ -137,7 +137,6 @@ func generateNextPageLink(currentPage, lastPage, limitNum int) string {
 	return generatePageLink(nextPage, limitNum)
 }
 
-// Helper function to generate the URL for the previous page
 func generatePrevPageLink(currentPage, limitNum int) string {
 	if currentPage <= 1 {
 		return ""
