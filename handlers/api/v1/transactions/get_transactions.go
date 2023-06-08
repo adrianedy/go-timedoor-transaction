@@ -9,10 +9,11 @@ import (
 	"strconv"
 
 	"github.com/backend-timedoor/go-transaction-module/database"
-	transcationModel "github.com/backend-timedoor/go-transaction-module/models/transaction"
+	transactionModel "github.com/backend-timedoor/go-transaction-module/models/transaction"
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -36,6 +37,15 @@ type Links struct {
 	Prev  string `json:"prev"`
 }
 
+type TransactionResponse struct {
+	ID          primitive.ObjectID        `bson:"_id,omitempty" json:"_id,omitempty"`
+	Code        int                       `bson:"code,omitempty" json:"code,omitempty"`
+	User_id     int                       `bson:"user_id,omitempty" json:"user_id,omitempty"`
+	Total_price float64                   `bson:"total_price,omitempty" json:"total_price,omitempty"`
+	Status      string                    `bson:"status,omitempty" json:"status,omitempty"`
+	Products    transactionModel.Products `bson:"products,omitempty" json:"products,omitempty"`
+}
+
 type PaginatedResponse struct {
 	Data  interface{} `json:"data"`
 	Meta  Meta        `json:"meta"`
@@ -44,7 +54,7 @@ type PaginatedResponse struct {
 
 func GetTransactions() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		collection := database.Collection(transcationModel.CollectionName)
+		collection := database.Collection(transactionModel.CollectionName)
 		defer collection.Database().Client().Disconnect(context.Background())
 
 		pageStr := c.QueryParam("page")
@@ -73,15 +83,17 @@ func GetTransactions() echo.HandlerFunc {
 		}
 		defer cursor.Close(context.Background())
 
-		transactions := []transcationModel.Transaction{}
+		transactions := []TransactionResponse{}
 		for cursor.Next(context.Background()) {
-			var transaction transcationModel.Transaction
+			var transaction transactionModel.Transaction
 			err := cursor.Decode(&transaction)
 			if err != nil {
 				log.Println(err)
 				return c.JSON(http.StatusInternalServerError, "Failed to decode transactions")
 			}
-			transactions = append(transactions, transaction)
+
+			TransactionResponse := ToResponse(transaction)
+			transactions = append(transactions, TransactionResponse)
 		}
 
 		totalCount, err := collection.CountDocuments(context.Background(), bson.M{})
@@ -121,6 +133,17 @@ func GetTransactions() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, response)
+	}
+}
+
+func ToResponse(t transactionModel.Transaction) TransactionResponse {
+	return TransactionResponse{
+		ID:          t.ID,
+		Code:        t.Code,
+		User_id:     t.User_id,
+		Total_price: t.Total_price,
+		Status:      t.Status.String(),
+		Products:    t.Products,
 	}
 }
 
